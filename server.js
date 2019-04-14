@@ -31,22 +31,26 @@ var server = http.createServer(function (request, response) {
     response.write('alert("此处是JS执行的命令")')
     response.end()
   } else if (path === '/') {
+    //读取html文件，获取db中数据，替换数据，将替换数据的html重新渲染页面，这里的amount是db中的数据
     var string = fs.readFileSync('./index.html','utf8')
     var amount = fs.readFileSync('./db','utf8')
     string = string.replace('&&&amount&&&',amount)
-    response.setHeader('Content-Type', 'text/html;charset=utf-8')
-    response.write(string)
+    response.setHeader('Content-Type','text/html;charset=utf-8')
+    response.write(string)//注意写入页面使用write
     response.end()
   }else if(path === '/pay'){
-  var amount = fs.readFileSync('./db','utf8')
+  //进入pay路径,获取amount，然后给amount-1，写入db
+  var amount = fs.readFileSync('db','utf8')
   var newAmount = amount - 1
   fs.writeFileSync('./db',newAmount)
-  response.setHeader('Content-Type', 'application/javascript')
+  response.setHeader('Content-Type','application/javascript')
   response.statusCode = 200
   let callbackName = query.callback
+  //jack.com的服务器返回一个数据，调用frank.com的函数
   response.write(`
-  ${callbackName}.call(undefined, 'success')
+  ${callbackName}.call(undefined,'success')
   `)
+
   response.end()
   } else {
     response.statusCode = 404
